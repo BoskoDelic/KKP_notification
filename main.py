@@ -1,55 +1,67 @@
 import sys
 import requests
 from bs4 import BeautifulSoup
+from kivy.app import App
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.image import AsyncImage
 
-def fetch_div_img(div):
-    image = div.find("img")
-    if not div:
-        print("No img in home_div")
-    link = image["src"]
+class WebScraper:
+    def __init__(self, url):
+        self.url = url
+        self.home_link = None
+        self.away_link = None
 
-    return link
+    def fetch_div_img(self, div):
+        image = div.find("img")
+        if not image:
+            print("No img in div")
+            return None
+        link = image["src"]
+        return link
 
-def web_scraper(url):
-    response = requests.get(url)
-    
-    if response.status_code != 200:
-        print(f"Failed to fetch content! Status code: {response.status_code}")
-        sys.exit(1)
+    def scrape(self):
+        response = requests.get(self.url)
+        if response.status_code != 200:
+            print(f"Failed to fetch content! Status code: {response.status_code}")
+            sys.exit(1)
 
-    soup = BeautifulSoup(response.text, "html.parser")
-    next_match_div = soup.find("div", class_ = "next-match-wrapper")
-    if not next_match_div:
-        print("Failed to fetch next match div")
-        sys.exit(1)
-    
-    paragraphs = next_match_div.find_all('p')
-    if not paragraphs:
-       print("Failed to fetch next match game time")
-       sys.exit(1)
-    
-    game_time = ""
-    for el in paragraphs:
-        game_time += el.text + " "
-    
-    game_time = game_time.strip()
-    
-    home_div = next_match_div.find("div", class_ = "team-1")
-    away_div = next_match_div.find("div", class_ = "team-2")
+        soup = BeautifulSoup(response.text, "html.parser")
+        next_match_div = soup.find("div", class_="next-match-wrapper")
+        if not next_match_div:
+            print("Failed to fetch next match div")
+            sys.exit(1)
 
-    if not home_div:
-        print("Failed to fetch home team div")
-        sys.exit(1)
-    if not away_div:
-        print("Failed to fetch away team div")
-        sys.exit(1)
+        home_div = next_match_div.find("div", class_="team-1")
+        away_div = next_match_div.find("div", class_="team-2")
 
-    home_link = fetch_div_img(home_div)
-    away_link = fetch_div_img(away_div)
+        if not home_div:
+            print("Failed to fetch home team div")
+            sys.exit(1)
+        if not away_div:
+            print("Failed to fetch away team div")
+            sys.exit(1)
 
-    print(home_link)
+        self.home_link = self.fetch_div_img(home_div)
+        self.away_link = self.fetch_div_img(away_div)
+        
+
+class ImageFetcherApp(App):
+    def __init__(self, url, **kwargs):
+        super().__init__(**kwargs)
+        self.scraper = WebScraper(url)
+
+    def build(self):
+        self.scraper.scrape()
+        root = BoxLayout(orientation='horizontal', spacing=100)
+
+        self.image1 = AsyncImage(source=self.scraper.home_link)
+        root.add_widget(self.image1)
+
+        self.image2 = AsyncImage(source=self.scraper.away_link)
+        root.add_widget(self.image2)
+
+        return root
 
 if __name__ == "__main__":
     target_url = "https://partizan.basketball/"
-
-    web_scraper(target_url)
+    ImageFetcherApp(target_url).run()
