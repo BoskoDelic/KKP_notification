@@ -72,7 +72,7 @@ class ImageFetcherApp(App):
         root.add_widget(self.image1)
 
         date_text = " Next game: \n" + self.scraper.date[0] + "\n" + self.scraper.date[1]
-        root.add_widget(Label(text = date_text, font_size = 20, halign = "center", valign = "center", font_name = "Roboto-Regular"))
+        root.add_widget(Label(text = date_text, font_size = 20, halign = "center", valign = "center", font_name = "Roboto-Bold"))
 
         self.image2 = AsyncImage(source = self.scraper.away_link, size_hint = (None, None), size = (200, 200))
         root.add_widget(self.image2)
