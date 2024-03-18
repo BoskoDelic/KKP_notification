@@ -7,7 +7,7 @@ from kivy.uix.image import AsyncImage
 from kivy.uix.label import Label
 from kivy.config import Config
 
-Config.set("graphics", "width", "500")
+Config.set("graphics", "width", "600")
 Config.set("graphics", "height", "200")
 Config.set("graphics", "resizable", "0")
 
@@ -72,8 +72,7 @@ class ImageFetcherApp(App):
         root.add_widget(self.image1)
 
         date_text = " Next game: \n" + self.scraper.date[0] + "\n" + self.scraper.date[1]
-
-        root.add_widget(Label(text = date_text, font_size = 15, halign = "center"))
+        root.add_widget(Label(text = date_text, font_size = 20, halign = "center", valign = "center", font_name = "Roboto-Regular"))
 
         self.image2 = AsyncImage(source = self.scraper.away_link, size_hint = (None, None), size = (200, 200))
         root.add_widget(self.image2)
