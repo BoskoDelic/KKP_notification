@@ -40,6 +40,7 @@ class WebScraper:
 
         home_div = next_match_div.find("div", class_ = "team-1")
         away_div = next_match_div.find("div", class_ = "team-2")
+        date_div = next_match_div.find("div", class_ = "time")
 
         if not home_div:
             print("Failed to fetch home team div")
@@ -47,10 +48,15 @@ class WebScraper:
         if not away_div:
             print("Failed to fetch away team div")
             sys.exit(1)
+        if not date_div:
+            print("Failed to fetch time div")
+            sys.exit(1)
+
+        paragraphs = date_div.find_all('p')
 
         self.home_link = self.fetch_div_img(home_div)
         self.away_link = self.fetch_div_img(away_div)
-
+        self.date = [str(p.text) for p in paragraphs]
 
 class ImageFetcherApp(App):
     def __init__(self, url, **kwargs):
@@ -64,6 +70,10 @@ class ImageFetcherApp(App):
 
         self.image1 = AsyncImage(source = self.scraper.home_link, size_hint = (None, None), size = (200, 200))
         root.add_widget(self.image1)
+
+        date_text = " Next game: \n" + self.scraper.date[0] + "\n" + self.scraper.date[1]
+
+        root.add_widget(Label(text = date_text, font_size = 15, halign = "center"))
 
         self.image2 = AsyncImage(source = self.scraper.away_link, size_hint = (None, None), size = (200, 200))
         root.add_widget(self.image2)
